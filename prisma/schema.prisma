@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  PATIENT 
+  DOCTOR
+  RECEPTIONIST
+  ADMIN
+}
+
+enum Day {
+  SATURDAY
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum ExceptionType {
+  UNAVAILABLE
+  EXTRA_WORKING_DAY
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED 
+  CHECKED_IN
+  COMPLETED
+  DECLINED 
+  CANCELLED 
+  NO_SHOW
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String 
+  email String @unique
+  passwordHash String 
+  role UserRole @default(PATIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctorSchedules DoctorSchedule[]
+  scheduleExceptions ScheduleException[]
+  patientAppointments Appointment[] @relation("patientAppointments")
+  doctorAppointments Appointment[] @relation("doctorAppointments")
+}
+
+model DoctorSchedule {
+  id Int @id @default(autoincrement())
+  doctorId Int 
+  dayOfWeek Day 
+  startTime String
+  endTime String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctor User @relation(fields: [doctorId], references: [id])
+}
+
+model ScheduleException {
+  id Int @id @default(autoincrement())
+  doctorId Int 
+  date DateTime 
+  type ExceptionType
+  startTime String?
+  endTime String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctor User @relation(fields: [doctorId], references: [id])
+}
+
+model Appointment {
+  id Int @id @default(autoincrement())
+  patientId Int 
+  doctorId Int 
+  startTime DateTime 
+  endTime DateTime
+  status AppointmentStatus
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  patient User @relation("patientAppointments", fields: [patientId], references: [id])
+  doctor User @relation("doctorAppointments", fields: [doctorId], references: [id])
+}
