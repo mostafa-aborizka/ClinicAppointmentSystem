@@ -226,4 +226,54 @@ router.post("/:id/exceptions", async (req, res) => {
 
 })
 
+router.get("/:id/exceptions", async (req, res) => {
+    const id = Number(req.params.id)
+    if (!Number.isInteger(id) || id <= 0){
+        return res.status(400).json({
+            status: "error",
+            message: "Invalid doctor id"
+        })
+    }
+    try {
+        const doctor = await prisma.user.findFirst({
+            where: {
+                id: id,
+                role: "DOCTOR"
+            },
+            select: {
+                id: true
+            }
+        })
+        if (!doctor) {
+            return res.status(404).json({
+                status: "error",
+                message: "Doctor was not found"
+            })
+        }
+        const exceptions = await prisma.scheduleException.findMany({
+            where: {
+                doctorId: id
+            },
+            select: {
+                id: true,
+                type: true,
+                date: true,
+                startTime: true,
+                endTime: true
+            },
+            orderBy: {
+                date: "asc"
+            }
+        })
+        res.status(200).json({data: exceptions})
+    }
+    catch(error) {
+        console.error("Failed to find exceptions", error);
+        res.status(500).json({
+            status: "error",
+            message: "Internal server error"
+        })
+    }    
+})
+
 export default router
