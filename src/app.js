@@ -2,6 +2,7 @@ import express from "express"
 import prisma from "./config/prisma.js"
 import doctorsRoute from "./routes/doctors.js"
 import schedulesRoute from "./routes/schedules.js"
+import slotsRoute from "./routes/slots.js"
 
 const app = express()
  
@@ -21,7 +22,7 @@ app.get("/health/db", async (req, res) => {
     res.status(503).json({ status: "error", database: "unavailable" });
   }
 })
-app.use("/api/doctors", doctorsRoute, schedulesRoute);
+app.use("/api/doctors", doctorsRoute, schedulesRoute, slotsRoute);
 
 
 export default app 

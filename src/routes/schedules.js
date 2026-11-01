@@ -1,19 +1,12 @@
 import express from "express";
 import prisma from "../config/prisma.js";
+import { timePattern, isValidDate } from "../utils/validators.js";
+import { validDays } from "../constants/days.js";
 
 const router = express.Router();
-const validDays = [
-    "SATURDAY",
-    "SUNDAY",
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    ];
-const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 const exceptionType = ["UNAVAILABLE", "EXTRA_WORKING_DAY"];
-const datePattern = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
 
 router.post("/:id/schedules", async (req, res) => {
     const id = Number(req.params.id)
@@ -147,21 +140,6 @@ router.post("/:id/exceptions", async (req, res) => {
             status: "error",
             message: "Invalid doctor id"
         })
-    }
-    function isValidDate(date) {
-        if (typeof date !== "string" || !datePattern.test(date)) {
-          return false;
-        }
-    
-        const [year, month, day] = date.split("-").map(Number);
-
-        const parsedDate = new Date(Date.UTC(year, month - 1, day));
-    
-        return (
-          parsedDate.getUTCFullYear() === year &&
-          parsedDate.getUTCMonth() === month - 1 &&
-          parsedDate.getUTCDate() === day
-        );
     }
     const hasStartTime = startTime !== undefined && startTime !== null && startTime !== "";
     const hasEndTime = endTime !== undefined && endTime !== null && endTime !== "";
