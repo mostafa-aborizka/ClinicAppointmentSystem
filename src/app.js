@@ -1,16 +1,17 @@
-import express from "express"
-import prisma from "./config/prisma.js"
-import doctorsRoute from "./routes/doctors.js"
-import schedulesRoute from "./routes/schedules.js"
-import slotsRoute from "./routes/slots.js"
+import express from "express";
+import prisma from "./config/prisma.js";
+import doctorsRoute from "./routes/doctors.js";
+import schedulesRoute from "./routes/schedules.js";
+import slotsRoute from "./routes/slots.js";
+import authRoute from "./routes/auth.js";
 
-const app = express()
- 
-app.use(express.json())
+const app = express();
+
+app.use(express.json());
 
 app.get("/health", (req, res) => {
-    res.json({status: "ok"})
-})
+  res.json({ status: "ok" });
+});
 
 app.get("/health/db", async (req, res) => {
   try {
@@ -21,8 +22,8 @@ app.get("/health/db", async (req, res) => {
     console.error("Database health check failed:", error);
     res.status(503).json({ status: "error", database: "unavailable" });
   }
-})
+});
 app.use("/api/doctors", doctorsRoute, schedulesRoute, slotsRoute);
+app.use("/api/auth", authRoute);
 
-
-export default app 
+export default app;
