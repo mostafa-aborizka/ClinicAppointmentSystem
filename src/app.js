@@ -4,6 +4,9 @@ import doctorsRoute from "./routes/doctors.js";
 import schedulesRoute from "./routes/schedules.js";
 import slotsRoute from "./routes/slots.js";
 import authRoute from "./routes/auth.js";
+import appointmentsRoute from "./routes/appointments.js";
+import authMiddleware from "./middleware/authMiddleware.js";
+import authorize from "./middleware/authorize.js";
 
 const app = express();
 
@@ -25,5 +28,17 @@ app.get("/health/db", async (req, res) => {
 });
 app.use("/api/doctors", doctorsRoute, schedulesRoute, slotsRoute);
 app.use("/api/auth", authRoute);
+app.use(
+  "/api/appointments",
+  authMiddleware,
+  authorize("PATIENT"),
+  appointmentsRoute,
+);
+// app.get("/test-auth", authMiddleware, (req, res) => {
+//   res.json({
+//     message: "Authenticated successfully",
+//     user: req.user,
+//   });
+// });
 
 export default app;

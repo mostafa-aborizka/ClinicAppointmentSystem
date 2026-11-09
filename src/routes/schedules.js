@@ -58,7 +58,7 @@ router.post("/:id/schedules", async (req, res) => {
       },
     });
     const hasConflict = schedules.some(
-      (schedule) =>
+      schedule =>
         schedule.dayOfWeek === dayOfWeek &&
         startTime < schedule.endTime &&
         endTime > schedule.startTime,

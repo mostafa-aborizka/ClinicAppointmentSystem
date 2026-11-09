@@ -1,7 +1,11 @@
+import { addDays, format, parseISO } from "date-fns";
 import prisma from "../config/prisma.js";
 import { validDays } from "../constants/days.js";
 import { AppError } from "../utils/AppError.js";
 import { minutesToTime, timeToMinutes } from "../utils/time.js";
+import { localDateTimeToUtc } from "../utils/timezone.js";
+import { formatInTimeZone } from "date-fns-tz";
+import { CLINIC_TIMEZONE } from "../constants/timezone.js";
 
 export async function getAvailableSlots(id, date) {
   const slots = [];
@@ -17,16 +21,16 @@ export async function getAvailableSlots(id, date) {
   if (!doctor) {
     throw new AppError("Doctor was not found", 404);
   }
-  const startOfDay = new Date(`${date}T00:00:00.000Z`);
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
+  const exceptionStart = new Date(`${date}T00:00:00.000Z`);
+  const exceptionEnd = new Date(exceptionStart);
+  exceptionEnd.setUTCDate(exceptionEnd.getUTCDate() + 1);
 
   const exceptions = await prisma.scheduleException.findMany({
     where: {
       doctorId: id,
       date: {
-        gte: startOfDay,
-        lt: endOfDay,
+        gte: exceptionStart,
+        lt: exceptionEnd,
       },
     },
     select: {
@@ -86,7 +90,9 @@ export async function getAvailableSlots(id, date) {
       exception.startTime &&
       exception.endTime,
   );
-
+  const startOfDay = localDateTimeToUtc(date, "00:00");
+  const nextDate = addDays(parseISO(date), 1);
+  const endOfDay = localDateTimeToUtc(format(nextDate, "yyyy-MM-dd"), "00:00");
   const appointments = await prisma.appointment.findMany({
     where: {
       doctorId: id,
@@ -114,14 +120,13 @@ export async function getAvailableSlots(id, date) {
       const unavailableEnd = timeToMinutes(period.endTime);
       return slotStart < unavailableEnd && slotEnd > unavailableStart;
     });
+    const slotStartUtc = localDateTimeToUtc(date, slot.startTime);
+    const slotEndUtc = localDateTimeToUtc(date, slot.endTime);
+
     const hasAppointmentConflict = appointments.some(appointment => {
-      const appointmentStart =
-        appointment.startTime.getUTCHours() * 60 +
-        appointment.startTime.getUTCMinutes();
-      const appointmentEnd =
-        appointment.endTime.getUTCHours() * 60 +
-        appointment.endTime.getUTCMinutes();
-      return slotStart < appointmentEnd && slotEnd > appointmentStart;
+      return (
+        slotStartUtc < appointment.endTime && slotEndUtc > appointment.startTime
+      );
     });
     return !hasUnavailableConflict && !hasAppointmentConflict;
   });
