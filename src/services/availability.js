@@ -4,8 +4,6 @@ import { validDays } from "../constants/days.js";
 import { AppError } from "../utils/AppError.js";
 import { minutesToTime, timeToMinutes } from "../utils/time.js";
 import { localDateTimeToUtc } from "../utils/timezone.js";
-import { formatInTimeZone } from "date-fns-tz";
-import { CLINIC_TIMEZONE } from "../constants/timezone.js";
 
 export async function getAvailableSlots(id, date) {
   const slots = [];

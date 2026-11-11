@@ -44,6 +44,12 @@ enum AppointmentStatus {
   NO_SHOW
 }
 
+enum RescheduleRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
 model User {
   id Int @id @default(autoincrement())
   name String 
@@ -56,6 +62,7 @@ model User {
   scheduleExceptions ScheduleException[]
   patientAppointments Appointment[] @relation("patientAppointments")
   doctorAppointments Appointment[] @relation("doctorAppointments")
+  reviewedRescheduleRequests RescheduleRequest[] @relation("RescheduleReviewer")
 }
 
 model DoctorSchedule {
@@ -93,4 +100,20 @@ model Appointment {
   
   patient User @relation("patientAppointments", fields: [patientId], references: [id])
   doctor User @relation("doctorAppointments", fields: [doctorId], references: [id])
+  rescheduleRequests RescheduleRequest[]
+}
+
+model RescheduleRequest {
+  id Int @id @default(autoincrement())
+  appointmentId Int
+  requestedStartTime DateTime
+  requestedEndTime DateTime
+  status RescheduleRequestStatus @default(PENDING)
+  requestedAt DateTime @default(now())
+  reviewedAt DateTime?
+  reviewedById Int?
+  declineReason String?
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  reviewedBy User? @relation("RescheduleReviewer", fields: [reviewedById], references: [id])
 }
