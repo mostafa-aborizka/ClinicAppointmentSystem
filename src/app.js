@@ -9,6 +9,7 @@ import authMiddleware from "./middleware/authMiddleware.js";
 import authorize from "./middleware/authorize.js";
 import rescheduleRequestsRoute from "./routes/rescheduleRequests.js";
 import doctorAppointmentsRoute from "./routes/doctorAppointments.js";
+import receptionistAppointmentsRoute from "./routes/receptionistAppointments.js";
 const app = express();
 
 app.use(express.json());
@@ -32,5 +33,10 @@ app.use(
   authorize("DOCTOR"),
   doctorAppointmentsRoute,
 );
-
+app.use(
+  "/api/receptionist",
+  authMiddleware,
+  authorize("RECEPTIONIST"),
+  receptionistAppointmentsRoute,
+);
 export default app;
