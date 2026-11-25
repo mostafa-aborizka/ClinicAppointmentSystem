@@ -21,12 +21,12 @@ app.use(
   authorize("DOCTOR", "RECEPTIONIST"),
   rescheduleRequestsRoute,
 );
-app.use(
-  "/api/appointments",
-  authMiddleware,
-  authorize("PATIENT"),
-  appointmentsRoute,
-);
+const appointmentApi = express.Router();
+appointmentApi.use(authMiddleware);
+appointmentApi.use(appointmentsRoute);
+appointmentApi.use(checkInRoute);
+app.use("/api/appointments", appointmentApi);
+
 app.use(
   "/api/doctors",
   authMiddleware,
@@ -39,4 +39,5 @@ app.use(
   authorize("RECEPTIONIST"),
   receptionistAppointmentsRoute,
 );
+
 export default app;

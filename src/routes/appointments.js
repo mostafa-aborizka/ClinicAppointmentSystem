@@ -3,8 +3,10 @@ import { isValidDate, timePattern } from "../utils/validators.js";
 import { getAvailableSlots } from "../services/availability.js";
 import { localDateTimeToUtc } from "../utils/timezone.js";
 import prisma from "../config/prisma.js";
+import authorize from "../middleware/authorize.js";
 
 const router = express.Router();
+router.use(authorize("PATIENT"));
 
 router.post("/", async (req, res) => {
   const { doctorId, date, startTime } = req.body;
