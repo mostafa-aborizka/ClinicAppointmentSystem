@@ -10,6 +10,7 @@ import authorize from "./middleware/authorize.js";
 import rescheduleRequestsRoute from "./routes/rescheduleRequests.js";
 import doctorAppointmentsRoute from "./routes/doctorAppointments.js";
 import receptionistAppointmentsRoute from "./routes/receptionistAppointments.js";
+import checkInRoute from "./routes/checkIn.js";
 const app = express();
 
 app.use(express.json());
